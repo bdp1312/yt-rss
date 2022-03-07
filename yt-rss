@@ -1,0 +1,43 @@
+#!/usr/bin/python3
+
+#Script will take valid youtube channel URL, construct RSS URL, and save to ~/.newsboat/urls
+
+#usage yt-rss <url0>, <url1>, etc.
+#requires python3
+
+#TODO get valid channel URL from youtube.com/c/ URLs
+#https://developers.google.com/youtube/v3/quickstart/python
+
+import sys
+import re
+import os
+
+#rss save location
+#myRssFile = os.path.expanduser("~/.newsboat/urls")
+myRssFile = ("./testFile.txt") #test location
+
+chidUrlBase = "https://www.youtube.com/channel/"
+rssUrlBase = "https://www.youtube.com/feeds/videos.xml?channel_id="
+rssUrls = []
+
+n = len(sys.argv)
+
+if n < 2:
+    print("ERROR! Must specify at least one valid url")
+else:
+    
+    #construct rssUrls
+    for i in range(1, n):
+        curStr = sys.argv[i]
+        if re.search(chidUrlBase+".*", curStr):
+           rssUrls.append(rssUrlBase+(re.split(chidUrlBase, curStr)[1]))
+        else:
+            print("'"+curStr+"' is not a valid youtube channel.")
+
+    if len(rssUrls)>0:
+        #save rssUrls
+        myFile = open(myRssFile, "a")
+        myFile.writelines(rssUrls)
+        myFile.close()
+    else:
+        print("No URLS found.")
