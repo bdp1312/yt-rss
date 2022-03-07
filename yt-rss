@@ -13,17 +13,31 @@ import re
 import os
 
 #rss save location
-#myRssFile = os.path.expanduser("~/.newsboat/urls")
-myRssFile = ("./testFile.txt") #test location
+myRssFile = os.path.expanduser("~/.newsboat/urls")
+#myRssFile = ("./testFile.txt") #test location
 
-chidUrlBase = "https://www.youtube.com/channel/"
+chidUrlBase = "https://www.youtube.com/channel/" #make sure input url has this format
 rssUrlBase = "https://www.youtube.com/feeds/videos.xml?channel_id="
 rssUrls = []
 
 n = len(sys.argv)
 
 if n < 2:
-    print("ERROR! Must specify at least one valid url")
+    #print("ERROR! Must specify at least one valid url")
+    while True:
+        print("Enter a url for a youtube channel or enter nothing to exit")
+        userIn = input()
+        if userIn == "":
+            break
+        else:
+            curStr = userIn
+        if re.search(chidUrlBase+".*", curStr):
+           rssUrls.append(rssUrlBase+(re.split(chidUrlBase, curStr)[1]))
+        else:
+            print("'"+curStr+"' is not a valid youtube channel.")
+
+
+
 else:
     
     #construct rssUrls
@@ -34,10 +48,12 @@ else:
         else:
             print("'"+curStr+"' is not a valid youtube channel.")
 
-    if len(rssUrls)>0:
-        #save rssUrls
-        myFile = open(myRssFile, "a")
-        myFile.writelines(rssUrls)
-        myFile.close()
-    else:
-        print("No URLS found.")
+if len(rssUrls)>0:
+    #save rssUrls
+    myFile = open(myRssFile, "a")
+    for l in rssUrls:
+        myFile.writelines(l)
+        myFile.write('\n')
+    myFile.close()
+else:
+    print("No URLS found.")
