@@ -11,6 +11,9 @@
 import sys
 import re
 import os
+import requests
+from bs4 import BeautifulSoup
+
 
 #rss save location
 myRssFile = os.path.expanduser("~/.newsboat/urls")
@@ -18,6 +21,8 @@ myRssFile = os.path.expanduser("~/.newsboat/urls")
 
 chidUrlBase = "https://www.youtube.com/channel/" #make sure input url has this format
 rssUrlBase = "https://www.youtube.com/feeds/videos.xml?channel_id="
+newChildUrlBase="https://www.youtube.com/@"
+
 rssUrls = []
 
 n = len(sys.argv)
@@ -43,8 +48,12 @@ else:
     #construct rssUrls
     for i in range(1, n):
         curStr = sys.argv[i]
-        if re.search(chidUrlBase+".*", curStr):
-           rssUrls.append(rssUrlBase+(re.split(chidUrlBase, curStr)[1]))
+        if re.search(chidUrlBase+".*", curStr) or re.search(newChildUrlBase+".*", curStr):
+           #rssUrls.append(rssUrlBase+(re.split(chidUrlBase, curStr)[1]))
+            r = requests.get(curStr)
+            soup=BeautifulSoup(r.content, "html.parser")
+            retval=soup.find(title="RSS")
+            rssUrls.append(retval['href'])
         else:
             print("'"+curStr+"' is not a valid youtube channel.")
 
@@ -52,6 +61,7 @@ if len(rssUrls)>0:
     #save rssUrls
     myFile = open(myRssFile, "a")
     for l in rssUrls:
+        print(l)
         myFile.writelines(l)
         myFile.write('\n')
     myFile.close()
