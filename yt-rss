@@ -14,6 +14,19 @@ import os
 import requests
 from bs4 import BeautifulSoup
 
+def scrapeRSSLink(curStr):
+    r = requests.get(curStr)
+    soup=BeautifulSoup(r.content, "html.parser")
+    retval=soup.find(title="RSS")
+    return retval['href']
+
+def printLinksToFile(rssUrls):
+    myFile = open(myRssFile, "a")
+    for l in rssUrls:
+        print(l)
+        myFile.writelines(l)
+        myFile.write('\n')
+    myFile.close()
 
 #rss save location
 myRssFile = os.path.expanduser("~/.newsboat/urls")
@@ -36,8 +49,8 @@ if n < 2:
             break
         else:
             curStr = userIn
-        if re.search(chidUrlBase+".*", curStr):
-           rssUrls.append(rssUrlBase+(re.split(chidUrlBase, curStr)[1]))
+        if re.search(chidUrlBase+".*", curStr) or re.search(newChildUrlBase+".*", curStr):
+            rssUrls.append(scrapeRSSLink(curStr))
         else:
             print("'"+curStr+"' is not a valid youtube channel.")
 
@@ -50,20 +63,12 @@ else:
         curStr = sys.argv[i]
         if re.search(chidUrlBase+".*", curStr) or re.search(newChildUrlBase+".*", curStr):
            #rssUrls.append(rssUrlBase+(re.split(chidUrlBase, curStr)[1]))
-            r = requests.get(curStr)
-            soup=BeautifulSoup(r.content, "html.parser")
-            retval=soup.find(title="RSS")
-            rssUrls.append(retval['href'])
+            rssUrls.append(scrapeRSSLink(curStr))
         else:
             print("'"+curStr+"' is not a valid youtube channel.")
 
 if len(rssUrls)>0:
     #save rssUrls
-    myFile = open(myRssFile, "a")
-    for l in rssUrls:
-        print(l)
-        myFile.writelines(l)
-        myFile.write('\n')
-    myFile.close()
+    printLinksToFile(rssUrls)
 else:
     print("No URLS found.")
